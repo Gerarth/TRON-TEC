@@ -1,0 +1,47 @@
+package com.java.project.sockets.clientes;
+//librerías necesarias para la conexión.
+import java.net.*;
+import java.io.*;
+
+public class Cliente {
+	
+	static Socket clienteSocket; //Socket del cliente.
+	static DataInputStream entrada; // Datos de entrada.
+	static DataOutputStream salida; //Datos de salida.
+	public static void main(String[] args) throws Exception {
+		System.out.println("Conectando con el servidor...");
+		clienteSocket=new Socket("localhost",9000); // El socket cliente se conecta con el socket servidor.
+		System.out.print("Conección completada con éxito.");
+		entrada = new DataInputStream(clienteSocket.getInputStream()); //Recibe todo lo que el servidor le envie.
+		System.out.println("Recibiendo datos...");
+		String test = entrada.readUTF(); //Recibe los datos enviados del servidor.
+		System.out.println("Mesaje del servidor : "+test); //Imprime los datos que recibio del servidor.
+		salida = new DataOutputStream(clienteSocket.getOutputStream());
+		EntradaServidor entradaHilo = new EntradaServidor(entrada);
+		Thread hilo2 = new Thread(entradaHilo); //Ejecutar nuestro segundo hilo.
+		hilo2.start();
+		while(true){ 
+			System.out.println("Probando salida de datos hacia el servidor con hilos.");
+			break;
+		}
+	}
+}
+class EntradaServidor implements Runnable{
+	
+	DataInputStream entrada;
+	
+	public EntradaServidor (DataInputStream entrada) {
+		this.entrada=entrada;
+	}
+	@Override
+	public void run() { //Metodo necesario. (Condicionales de prueba).
+		while(true){
+			try {
+				String mensaje = entrada.readUTF();
+				System.out.println(mensaje);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}	
+		}
+	}	
+}
