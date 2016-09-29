@@ -1,0 +1,59 @@
+package com.java.project.sockets.servidor;
+
+//librerías necesarias para la conexión.
+import java.net.*;
+import java.io.*;
+
+public class Servidor {
+	
+	static ServerSocket servidor; //Socket del servidor.
+	static Socket clienteSocket; //Socket del cliente.
+	static DataOutputStream salida; //Datos de salida.
+	static DataInputStream entrada; //Datos de entrada.
+	static Usuarios[] usuario = new Usuarios[3];
+	public static void main(String[] args) throws Exception {
+		System.out.println("Iniciando servidor ...");
+		servidor = new ServerSocket(9000); //Se crea el socket para el servidor en el puerto 9000.
+		System.out.println("Servidor iniciado.");
+		while(true){
+			for(int i=0;i<3;i++){
+				clienteSocket = servidor.accept(); //Se comienza el socket y espera una conexión con un cliente.
+				System.out.println("Conección con: "+clienteSocket.getInetAddress());
+				salida = new DataOutputStream(clienteSocket.getOutputStream()); //Para enviar datos al cliente.
+				salida.writeUTF("Probando sockets"); //Envia datos al cliente.
+				System.out.println("Los datos han sido enviados");
+				entrada = new DataInputStream(clienteSocket.getInputStream());//Recibir datos de los clientes conectados.
+				if (usuario[i]==null){ //Condicional para que se ejecute el hilo que recibe los clientes.
+					usuario[i]=new Usuarios(salida,entrada,usuario);
+					Thread hilo1=new Thread(usuario[i]); //Ejecutar nuestro primer hilo.
+					hilo1.start();
+					break;
+				}
+			}
+		}
+	}
+} //Implementación para la cantidad de clientes conectados al servidor.
+class Usuarios implements Runnable{
+	DataOutputStream salida;
+	DataInputStream entrada;
+	Usuarios[] usuario = new Usuarios[3];
+	public Usuarios(DataOutputStream salida,DataInputStream entrada,Usuarios[]usuario){
+		this.entrada=entrada;
+		this.salida=salida;
+		this.usuario=usuario;
+	}
+	@Override
+	public void run() { //Metodo necesario. (Condicionales de prueba).
+			try {
+				for(int i=0; i<3;i++){
+					if(usuario[i]!=null){
+						usuario[i].salida.writeUTF("Probando los hilos y salida de datos del servidor en sockets");
+						System.out.println("Probando envío de datos de servidor a cliente");
+						break;
+					}
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
